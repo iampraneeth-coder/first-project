@@ -24,69 +24,98 @@ if not TOKEN:
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the /start command."""
     user = update.effective_user
-    if user: # Check if user object exists
+    if user:  # Check if user object exists
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                     text=f"Hello {user.first_name}! I'm your bot. Use /help to see available commands.")
-        logger.info(f"User {user.username} (ID: {user.id}) started the bot.") # Log user ID
+        logger.info(f"User {user.username} (ID: {user.id}) started the bot.")  # Log user ID
     else:
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                         text="Hello! I'm your bot. Use /help to see available commands.")
         logger.warning("Could not retrieve user information for /start command.")
 
+
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the /help command."""
-    help_text = """
-I am a versatile Telegram bot! Here are the commands I understand:
+    user = update.effective_user
+    if user:
+        help_text = """
+    I am a versatile Telegram bot! Here are the commands I understand:
 
-/start - Starts the bot and greets you.
-/help - Displays this help message.
-/caps <text> - Converts the given text to uppercase.
-/echo <text> - Repeats the given text back to you.
-/about - Provides information about the bot.
-<any text> - Responds with a general reply.
-"""
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=help_text)
-    logger.info(f"User {update.effective_user.username} requested help.")
+    /start - Starts the bot and greets you.
+    /help - Displays this help message.
+    /caps <text> - Converts the given text to uppercase.
+    /echo <text> - Repeats the given text back to you.
+    /about - Provides information about the bot.
+    <any text> - Responds with a general reply.
+    """
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=help_text)
+        logger.info(f"User {user.username} requested help.")
+    else:
+        logger.warning("Could not retrieve user information for /help command.")
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="Help information unavailable.")
+
 
 async def caps(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the /caps command."""
-    try:
-        text_caps = ' '.join(context.args).upper()
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=text_caps)
-        logger.info(f"User {update.effective_user.username} used /caps: {text_caps}")
-    except IndexError:
-        await context.bot.send_message(chat_id=update.effective_chat.id,
-                                    text="Please provide some text after /caps.")
-        logger.warning(f"User {update.effective_user.username} used /caps without text.")
+    user = update.effective_user
+    if user:
+        try:
+            text_caps = ' '.join(context.args).upper()
+            await context.bot.send_message(chat_id=update.effective_chat.id, text=text_caps)
+            logger.info(f"User {user.username} used /caps: {text_caps}")
+        except IndexError:
+            await context.bot.send_message(chat_id=update.effective_chat.id,
+                                        text="Please provide some text after /caps.")
+            logger.warning(f"User {user.username} used /caps without text.")
+    else:
+        logger.warning("Could not retrieve user information for /caps command.")
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="Caps function unavailable.")
+
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the /echo command."""
-    try:
-        text = ' '.join(context.args)
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=text)
-        logger.info(f"User {update.effective_user.username} used /echo: {text}")
-    except IndexError:
-        await context.bot.send_message(chat_id=update.effective_chat.id,
-                                        text="Please provide some text after /echo.")
-        logger.warning(f"User {update.effective_user.username} used /echo without text.")
+    user = update.effective_user
+    if user:
+        try:
+            text = ' '.join(context.args)
+            await context.bot.send_message(chat_id=update.effective_chat.id, text=text)
+            logger.info(f"User {user.username} used /echo: {text}")
+        except IndexError:
+            await context.bot.send_message(chat_id=update.effective_chat.id,
+                                            text="Please provide some text after /echo.")
+            logger.warning(f"User {user.username} used /echo without text.")
+    else:
+        logger.warning("Could not retrieve user information for /echo command.")
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="Echo function unavailable.")
+
 
 async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the /about command."""
-    about_text = "This is a simple Telegram bot created as an example."
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=about_text)
-    logger.info(f"User {update.effective_user.username} requested about information.")
+    user = update.effective_user
+    if user:
+        about_text = "This is a simple Telegram bot created as an example."
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=about_text)
+        logger.info(f"User {user.username} requested about information.")
+    else:
+        logger.warning("Could not retrieve user information for /about command.")
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="About information unavailable.")
+
 
 # --- Message Handler (for general text) ---
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles general text messages."""
-    user_message = update.message.text
-    if user_message:  # check for empty message
-        response = f"You said: {user_message}. I'm just a simple bot, so that's all I can do right now."
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=response)
-        logger.info(f"User {update.effective_user.username} sent a message: {user_message}")
+    user = update.effective_user
+    if user:
+        user_message = update.message.text
+        if user_message:  # check for empty message
+            response = f"You said: {user_message}. I'm just a simple bot, so that's all I can do right now."
+            await context.bot.send_message(chat_id=update.effective_chat.id, text=response)
+            logger.info(f"User {user.username} sent a message: {user_message}")
+        else:
+            logger.warning(f"User {user.username} sent an empty message.")
     else:
-        logger.warning("Received an empty message.")
+        logger.warning("Could not retrieve user information for handle_message.")
 
 
 # --- Error Handler ---
